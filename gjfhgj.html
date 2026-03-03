@@ -9,7 +9,7 @@
         header { position:fixed; background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.15)), url('https://images.unsplash.com/photo-1548365328-5b8a7b8a3d0b?q=80&w=1400&auto=format&fit=crop&s='); color: white; text-align: center; padding: 40px 24px; background-size: cover; background-position: center; }
         header h1 { margin:0; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
         .header-actions { position: absolute; right: 20px; top: 18px; display:none; gap:8px; align-items:center; }
-        nav { background: #222; padding: 10px; text-align: center; }
+        nav { background: #222; padding: 10px; text-align: ыфcenter; }
         nav a { color: white; margin: 0 12px; text-decoration: none; font-weight: bold; }
         .container { padding: 20px; }
         .center { max-width: 1100px; margin: 0 auto; }
@@ -154,8 +154,27 @@
 </div>
 
 <div class="footer">© 2026 FoodExpress</div>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, setDoc, updateDoc,
+  onSnapshot, query, orderBy
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-<script>
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCX4Ej-J-F3nBBVUhEuuISO5Xg8aNHMGiE",
+  authDomain: "foodex-7fe5e.firebaseapp.com",
+  projectId: "foodex-7fe5e",
+  storageBucket: "foodex-7fe5e.firebasestorage.app",
+  messagingSenderId: "850173096362",
+  appId: "1:850173096362:web:27bc2f91019671988bbbd3",
+  measurementId: "G-L6WFFN292H"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const ORDERS_COL = collection(db, "orders");
+<<script type="module">
 // Demo data
 const products = [
 {id:1, name:'Бургер Классический', price:1500, category:'burger', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'},
@@ -225,8 +244,13 @@ const products = [
 function load(key, def){ try{ return JSON.parse(localStorage.getItem(key)) ?? def; }catch(e){return def;} }
 function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
 
-let state = { user: load('user', null), cart: load('cart', []), orders: load('orders', []), nextOrderId: load('nextOrderId', 1), tempCheckout: null };
-
+let state = {
+  user: load('user', null),
+  cart: load('cart', []),
+  orders: [],              // теперь приходит из Firestore
+  tempCheckout: null
+};
+    
 // track current view and throttle rapid calls to avoid UI flicker
 let _currentView = null;
 let _showViewCalls = 0;
@@ -296,8 +320,35 @@ if(payCard){
     });
 }
 
-function saveState(){ save('orders', state.orders); save('nextOrderId', state.nextOrderId); save('cart', state.cart); save('user', state.user); }
+function saveState(){
+  save('cart', state.cart);
+  save('user', state.user);
+  // orders НЕ сохраняем локально — они в Firestore
+}
+    let _unsubOrders = null;
 
+function startOrdersListener(){
+  // если уже слушаем — выключим и включим заново (например при смене пользователя)
+  if(_unsubOrders) { try{ _unsubOrders(); }catch(e){} _unsubOrders = null; }
+
+  const q = query(ORDERS_COL, orderBy("created", "desc"));
+  _unsubOrders = onSnapshot(q, (snap)=>{
+    const arr = [];
+    snap.forEach(d => arr.push(d.data()));
+    state.orders = arr;
+
+    // если пользователь сейчас на экранах, где важны заказы — обновим списки
+    try{
+      if(state.user?.role === 'admin') renderAdmin();
+      if(state.user?.role === 'client') {
+        // чтобы "Мои заказы" обновлялись на другом устройстве без перезагрузки
+        renderOrders();
+      }
+    }catch(e){}
+  }, (err)=>{
+    console.error("Firestore listener error:", err);
+  });
+}
 // adjust header buttons visibility based on current user role
 function updateHeaderForUser(){
     const ha = document.querySelector('.header-actions');
@@ -420,10 +471,42 @@ const _payNowBtn = document.getElementById('pay-now'); if(_payNowBtn) _payNowBtn
     if(!/^[0-9]{12,19}$/.test(card)){ alert('Неверный номер карты '); return; }
     if(!/^[0-9]{3,4}$/.test(cvv)){ alert('Неверный CVV'); return; }
     // create order
-    const id = state.nextOrderId++; const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
-    const order = { id, items: JSON.parse(JSON.stringify(state.cart)), total, address: state.tempCheckout?.address||'', comment: state.tempCheckout?.comment||'', card: '****'+card.slice(-4), status:'принят', paid:true, client:state.user?.name||'guest', created: new Date().toISOString() };
-    state.orders.push(order); state.cart=[]; state.tempCheckout=null; saveState(); alert('Оплата принята — заказ №'+order.id); renderOrders(); showView('client-orders'); renderAdmin(); });
+    const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
 
+// уникальный id, чтобы не конфликтовал между устройствами
+const id = Date.now(); 
+
+const order = {
+  id,
+  items: JSON.parse(JSON.stringify(state.cart)),
+  total,
+  address: state.tempCheckout?.address || '',
+  comment: state.tempCheckout?.comment || '',
+  card: '****' + card.slice(-4),
+  status: 'принят',
+  paid: true,
+  client: state.user?.name || 'guest',
+  created: new Date().toISOString()
+};
+
+// Пишем заказ в Firestore (а не в local)
+setDoc(doc(db, "orders", String(id)), order)
+  .then(()=>{
+    state.cart = [];
+    state.tempCheckout = null;
+    saveState();
+
+    alert('Оплата принята — заказ №' + order.id);
+
+    // UI как было
+    renderOrders();
+    showView('client-orders');
+    renderAdmin();
+  })
+  .catch((err)=>{
+    console.error("Order create failed:", err);
+    alert("Не удалось создать заказ. Проверь консоль и правила Firestore.");
+  });
 // Client orders
 function renderOrders(){ const el=document.getElementById('orders-list'); el.innerHTML=''; if(!state.user) return; const my = state.orders.filter(o=>o.client===state.user.name); if(my.length===0){ el.innerHTML='<div class="small">Нет заказов</div>'; return; } my.slice().reverse().forEach(o=>{ const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div style="display:flex;justify-content:space-between"><div>№${o.id} — ${o.status}</div><div>${o.total}₸</div></div><div class="small">${o.created.split('T')[0]}</div><div style="margin-top:6px;"><button data-id="${o.id}" class="view-order">Подробнее</button></div>`; el.appendChild(d); d.querySelector('.view-order').addEventListener('click', ()=>{ renderOrderDetail(o.id); showView('client-order'); }); }); }
 
@@ -432,8 +515,72 @@ function renderOrderDetail(id){ const o = state.orders.find(x=>x.id===id); if(!o
 // Admin
 function renderAdmin(){ const el=document.getElementById('admin-list'); el.innerHTML=''; const list = state.orders.filter(o=>o.paid && o.status!=='выдан'); if(list.length===0){ el.innerHTML='<div class="small">Нет текущих оплаченных заказов</div>'; return; } list.slice().reverse().forEach(o=>{ const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><div>№${o.id} — ${o.client}</div><div>${o.total}₸</div></div><div class="small">${o.created}</div><div style="margin-top:8px;"><button data-id="${o.id}" class="admin-view">Просмотреть</button></div>`; el.appendChild(d); d.querySelector('.admin-view').addEventListener('click', ()=>{ renderAdminOrderDetail(o.id); showView('admin-order'); }); }); }
 
-function renderAdminOrderDetail(id){ const o = state.orders.find(x=>x.id===id); if(!o) return; const el = document.getElementById('admin-order-detail'); let html = `<div><b>Заказ №${o.id}</b> — <span class="small">${o.status}</span></div><div class="small">Клиент: ${o.client} • ${o.created}</div><div style="margin-top:8px;"><b>Адрес:</b> ${o.address || '-'}<br><b>Комментарий:</b> ${o.comment || '-'}</div><div style="margin-top:8px;"><b>Содержимое:</b><ul>`; o.items.forEach(it=> html += `<li>${it.name} × ${it.qty} — ${it.price*it.qty}₸</li>`); html += `</ul></div><div style="margin-top:8px;"><b>Итого:</b> ${o.total}₸</div>`; html += `<div style="margin-top:12px;"><label>Статус: <select id="admin-status-select"><option value="принят">принят</option><option value="готовится">готовится</option><option value="собирается">собирается</option><option value="готов">готов</option><option value="выдан">выдан</option></select></label> <button id="admin-save-status">Сохранить</button></div>`; el.innerHTML = html; const sel = document.getElementById('admin-status-select'); if(sel) sel.value = o.status || 'принят'; const saveBtn = document.getElementById('admin-save-status'); if(saveBtn){ saveBtn.onclick = ()=>{ const newStatus = sel.value; o.status = newStatus; saveState(); renderAdmin(); renderOrders(); alert('Статус обновлён'); showView('admin'); }; } const backBtn = document.getElementById('admin-order-back'); if(backBtn){ backBtn.onclick = ()=>{ renderAdmin(); showView('admin'); }; } }
+function function renderAdminOrderDetail(id){
+  const o = state.orders.find(x=>x.id===id);
+  if(!o) return;
 
+  const el = document.getElementById('admin-order-detail');
+
+  let html = `<div><b>Заказ №${o.id}</b> — <span class="small">${o.status}</span></div>
+  <div class="small">Клиент: ${o.client} • ${o.created}</div>
+  <div style="margin-top:8px;">
+    <b>Адрес:</b> ${o.address || '-'}<br>
+    <b>Комментарий:</b> ${o.comment || '-'}
+  </div>
+  <div style="margin-top:8px;">
+    <b>Содержимое:</b><ul>`;
+
+  o.items.forEach(it=>{
+    html += `<li>${it.name} × ${it.qty} — ${it.price*it.qty}₸</li>`;
+  });
+
+  html += `</ul></div>
+  <div style="margin-top:8px;"><b>Итого:</b> ${o.total}₸</div>
+  <div style="margin-top:12px;">
+    <label>Статус:
+      <select id="admin-status-select">
+        <option value="принят">принят</option>
+        <option value="готовится">готовится</option>
+        <option value="собирается">собирается</option>
+        <option value="готов">готов</option>
+        <option value="выдан">выдан</option>
+      </select>
+    </label>
+    <button id="admin-save-status">Сохранить</button>
+  </div>`;
+
+  el.innerHTML = html;
+
+  const sel = document.getElementById('admin-status-select');
+  if(sel) sel.value = o.status || 'принят';
+
+  const saveBtn = document.getElementById('admin-save-status');
+  if(saveBtn){
+    saveBtn.onclick = ()=>{
+      const newStatus = sel.value;
+
+      updateDoc(doc(db, "orders", String(o.id)), {
+        status: newStatus
+      })
+      .then(()=>{
+        alert('Статус обновлён');
+        showView('admin');
+      })
+      .catch((err)=>{
+        console.error("Status update failed:", err);
+        alert("Ошибка обновления статуса");
+      });
+    };
+  }
+
+  const backBtn = document.getElementById('admin-order-back');
+  if(backBtn){
+    backBtn.onclick = ()=>{
+      renderAdmin();
+      showView('admin');
+    };
+  }
+}
 // Initial rendering if user persisted
 if(state.user && state.user.role==='client') openClientMenu();
 else if(state.user && state.user.role==='admin') openAdmin();
@@ -443,6 +590,7 @@ else showView('login');
 updateCartBadge();
 // update header controls on load
 updateHeaderForUser();
+startOrdersListener();
 
 // --- Предотвращаем случайные перезагрузки и навигацию (поддержка SPA) ---
 // Блокируем клавиши перезагрузки (F5, Ctrl/Cmd+R)
@@ -506,4 +654,5 @@ window.addEventListener('beforeunload', function(evt){
 });
 </script>
 </body>
+
 </html>
