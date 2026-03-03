@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>FoodExpress — Демо</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background: #f0f0f0; }
+        header { position:fixed; background: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.15)), url('https://images.unsplash.com/photo-1548365328-5b8a7b8a3d0b?q=80&w=1400&auto=format&fit=crop&s='); color: white; text-align: center; padding: 40px 24px; background-size: cover; background-position: center; }
+        header h1 { margin:0; text-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .header-actions { position: absolute; right: 20px; top: 18px; display:none; gap:8px; align-items:center; }
+        nav { background: #222; padding: 10px; text-align: center; }
+        nav a { color: white; margin: 0 12px; text-decoration: none; font-weight: bold; }
+        .container { padding: 20px; }
+        .center { max-width: 1100px; margin: 0 auto; }
+        .hidden { display: none; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.12); overflow: hidden; }
+        .menu { display: flex; gap: 20px; flex-wrap: wrap; }
+        .product { width: 260px; text-align: center; border-radius: 12px; overflow: hidden; }
+        .product img { width: 100%; height:160px; object-fit: cover; }
+        .product .info { padding: 14px; }
+        .price { color: #ff0000; font-weight: bold; }
+        button { background: #ff6a00; border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        button { background: #000000; border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        .hotbar { margin-bottom: 12px; }
+        .hotbar button { margin-right: 8px; }
+        .topbar { display:flex; flex-direction:column; align-items:center; gap:8px; }
+        .cart-list, .orders-list, .admin-list { display:flex; flex-direction:column; gap:10px; }
+        .list-item { background:white; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+        .footer { background: #222; color: white; text-align: center; padding: 12px; margin-top: 24px; }
+        form input, form textarea, form select { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
+        .small { font-size: 14px; color: #666; }
+            .cart-btn { position: relative; padding: 8px 14px; }
+            #cart-count-badge { position: absolute; top: -8px; right: -8px; background: #ff0000; color: white; border-radius: 50%; width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
+            .qty-controls button { background:#eee; color:#333; border-radius:6px; padding:4px 8px; }
+            .qty-controls .qty { min-width:24px; display:inline-block; text-align:center; }
+    </style>
+</head>
+<body>
+<header>
+    <div class="center">
+        <h1>FoodExpress</h1>
+    </div>
+    <div class="header-actions">
+        <button id="nav-cart" class="cart-btn" type="button">Корзина <span id="cart-count-badge">0</span></button>
+        <button id="nav-orders" type="button">Мои заказы</button>
+        <button id="logout-client" type="button">Выйти</button>
+    </div>
+</header>
+
+<div class="container center">
+    <!-- Login view -->
+    <div id="view-login" class="card" style="padding:20px; margin-top:20px;">
+        <h2>Вход</h2>
+        <form id="login-form">
+            <label>Логин</label>
+            <input id="login-username" type="text">
+            <label>Пароль</label>
+            <input id="login-password" type="password">
+            <div style="margin-top:10px; display:flex; gap:8px;">
+                <button type="submit">Войти</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Client menu view -->
+    <div id="view-client-menu" class="hidden">
+        <div class="topbar">
+                <h2>Меню</h2>
+                <div class="hotbar">
+                    <button data-filter="all">Все</button>
+                    <button data-filter="main">Основное</button>
+                    <button data-filter="burger">Бургеры</button>
+                    <button data-filter="pizza">Пицца</button>
+                    <button data-filter="side"="appetizer">Закуски</button>
+                    <button data-filter="soup">Супы</button>
+                    <button data-filter="shashlik">Шашлык</button>
+                    <button data-filter="sushi">Суши-роллы</button>
+                    <button data-filter="salad">Салаты</button>
+                    <button data-filter="sauce">Соуса</button> 
+                    <button data-filter="dessert">Десерты</button>
+                    <button data-filter="drinks">Холодные напитки</button>
+                </div>
+                <div class="small">Вошли как <span id="client-name"></span></div>
+            </div>
+
+        <div id="menu-area" class="menu" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Cart page -->
+    <div id="view-cart" class="hidden card" style="padding:12px; margin-top:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Корзина</h3><div><button id="cart-back" type="button">← Меню</button></div></div>
+        <div id="cart-items" class="cart-list"></div>
+        <div style="margin-top:10px;">Итого: <b id="cart-total">0</b> ₸</div>
+        <div style="margin-top:10px; display:flex; gap:8px;"><button id="to-address" type="button">Оформить заказ</button> <button id="clear-cart" type="button">Очистить</button></div>
+    </div>
+
+    <!-- Address page -->
+    <div id="view-address" class="hidden card" style="padding:12px; margin-top:18px;">
+        <h3>Адрес доставки</h3>
+        <form id="form-address">
+            <label>Адрес</label>
+            <input id="address" required>
+            <label>Комментарий</label>
+            <textarea id="comment"></textarea>
+            <div style="margin-top:10px;"><button type="submit">Далее — оплата</button> <button type="button" id="address-back">Назад</button></div>
+        </form>
+    </div>
+
+    <!-- Payment page -->
+    <div id="view-payment" class="hidden card" style="padding:12px; margin-top:18px;">
+        <h3>Оплата</h3>
+        <div style="max-width:420px;">
+            <div style="background:#fff; padding:12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+                <label>Номер карты</label>
+                <input id="pay-card" placeholder="1234 5678 9012 3456" required>
+                <label>Срок (MM/YY)</label>
+                <input id="pay-exp" placeholder="12/26" required>
+                <label>CVV</label>
+                <input id="pay-cvv" placeholder="123" required>
+                <div style="margin-top:10px;"><button id="pay-now" type="button">Оплатить</button> <button id="payment-back" type="button">Назад</button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client orders page -->
+    <div id="view-client-orders" class="hidden" style="margin-top:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Мои заказы</h3><div><button id="orders-back">← Меню</button></div></div>
+        <div id="orders-list" class="orders-list"></div>
+    </div>
+
+    <!-- Admin dashboard -->
+    <div id="view-admin" class="hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>Админ-панель</h2>
+            <div><button id="logout-admin">Выйти</button></div>
+        </div>
+        <p class="small">Панель — оплаченные текущие заказы</p>
+        <div id="admin-list" class="admin-list"></div>
+    </div>
+
+    <!-- Client order detail page -->
+    <div id="view-client-order" class="hidden card" style="padding:12px; margin-top:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Детали заказа</h3><div><button id="client-order-back">← Назад</button></div></div>
+        <div id="client-order-detail" style="margin-top:10px;"></div>
+    </div>
+
+    <!-- Admin order detail page -->
+    <div id="view-admin-order" class="hidden card" style="padding:12px; margin-top:18px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;"><h3>Админ: деталь заказа</h3><div><button id="admin-order-back">← Назад</button></div></div>
+        <div id="admin-order-detail" style="margin-top:10px;"></div>
+    </div>
+
+</div>
+
+<div class="footer">© 2026 FoodExpress</div>
+
+<script>
+// Demo data
+const products = [
+{id:1, name:'Бургер Классический', price:1500, category:'burger', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'},
+{id:2, name:'Чизбургер', price:1650, category:'burger', img:'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80'},
+{id:3, name:'Бургер BBQ', price:1750, category:'burger', img:'https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=800&q=80'},
+{id:4, name:'Пикантный бургер с беконом', price:1900, category:'burger', img:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=800&q=80'},
+{id:5, name:'Вегетарианский бургер', price:1400, category:'burger', img:'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=800&q=80'},
+
+{id:6, name:'Маргарита (пицца)', price:2200, category:'pizza', img:'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=800&q=80'},
+{id:7, name:'Пепперони (пицца)', price:2600, category:'pizza', img:'https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=800&q=80'},
+{id:8, name:'Четыре сыра (пицца)', price:2700, category:'pizza', img:'https://images.unsplash.com/photo-1548365328-9f547fb0953d?auto=format&fit=crop&w=800&q=80'},
+{id:9, name:'Пицца с курицей и грибами', price:2550, category:'pizza', img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80'},
+{id:10, name:'Острая гавайская', price:2400, category:'pizza', img:'https://images.unsplash.com/photo-1601924579440-0f2d3f6d63d8?auto=format&fit=crop&w=800&q=80'},
+
+{id:11, name:'Картошка фри', price:900, category:'side', img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80'},
+{id:12, name:'Луковые кольца', price:700, category:'side', img:'https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=800&q=80'},
+{id:13, name:'Куриные наггетсы', price:950, category:'side', img:'https://images.unsplash.com/photo-1604908554007-1d8b4e3c8b5d?auto=format&fit=crop&w=800&q=80'},
+
+{id:14, name:'Суп том-ям', price:1100, category:'soup', img:'https://images.unsplash.com/photo-1604908812009-66b7d8e0f299?auto=format&fit=crop&w=800&q=80'},
+{id:15, name:'Крем-суп из грибов', price:900, category:'soup', img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80'},
+{id:16, name:'Борщ со сметаной', price:850, category:'soup', img:'https://images.unsplash.com/photo-1617196038435-d58a9a9b7353?auto=format&fit=crop&w=800&q=80'},
+{id:17, name:'Суп с фрикадельками', price:800, category:'soup', img:'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80'},
+
+{id:18, name:'Шашлык из свинины (6 шампуров)', price:2800, category:'shashlik', img:'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80'},
+{id:19, name:'Шашлык из курицы (6 шампуров)', price:2400, category:'shashlik', img:'https://images.unsplash.com/photo-1625944525903-b0c3a7e5c8c8?auto=format&fit=crop&w=800&q=80'},
+{id:20, name:'Люля-кебаб говяжий', price:2600, category:'shashlik', img:'https://images.unsplash.com/photo-1626200419199-391ae4be7c15?auto=format&fit=crop&w=800&q=80'},
+
+{id:21, name:'Суши сет (16 шт)', price:3200, category:'sushi', img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80'},
+{id:22, name:'Ролл Калифорния (8 шт)', price:1500, category:'sushi', img:'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80'},
+{id:23, name:'Филадельфия (8 шт)', price:1700, category:'sushi', img:'https://images.unsplash.com/photo-1617191519221-9a0b6a4f4e6a?auto=format&fit=crop&w=800&q=80'},
+{id:24, name:'Ролл острый (8 шт)', price:1600, category:'sushi', img:'https://images.unsplash.com/photo-1582450871972-ab5ca641643d?auto=format&fit=crop&w=800&q=80'},
+{id:47, name:'Суши-ролл ассорти (12 шт)', price:2400, category:'sushi', img:'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?auto=format&fit=crop&w=800&q=80'},
+
+{id:33, name:'Салат Цезарь', price:1200, category:'salad', img:'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800&q=80'},
+{id:34, name:'Греческий салат', price:1100, category:'salad', img:'https://images.unsplash.com/photo-1608032077018-c9aad9565d29?auto=format&fit=crop&w=800&q=80'},
+{id:35, name:'Салат с тунцом', price:1350, category:'salad', img:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'},
+
+{id:36, name:'Лапша с курицей', price:1300, category:'main', img:'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80'},
+{id:37, name:'Стейк рибай', price:3800, category:'main', img:'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80'},
+{id:38, name:'Паста Карбонара', price:1450, category:'main', img:'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80'},
+{id:39, name:'Ризотто с грибами', price:1600, category:'main', img:'https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=800&q=80'},
+{id:49, name:'Панини с ветчиной', price:950, category:'main', img:'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80'},
+
+{id:29, name:'Чизкейк', price:700, category:'dessert', img:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80'},
+{id:30, name:'Мороженое', price:450, category:'dessert', img:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80'},
+{id:31, name:'Тирамису', price:750, category:'dessert', img:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80'},
+{id:32, name:'Круассан с шоколадом', price:350, category:'dessert', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80'},
+
+{id:25, name:'Кока-кола', price:400, category:'drinks', img:'https://images.unsplash.com/photo-1624517452488-04869289c4ca?auto=format&fit=crop&w=800&q=80'},
+{id:26, name:'Фреш апельсиновый', price:500, category:'drinks', img:'https://images.unsplash.com/photo-1553531889-56cc480ac5cb?auto=format&fit=crop&w=800&q=80'},
+{id:27, name:'Чай зелёный', price:250, category:'drinks', img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80'},
+{id:28, name:'Кофе латте', price:450, category:'drinks', img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'},
+{id:40, name:'Бокал пива (0.5 л)', price:700, category:'drinks', img:'https://images.unsplash.com/photo-1515165562835-cf4a6f2b7c5d?auto=format&fit=crop&w=800&q=80'},
+{id:48, name:'Чай масала', price:300, category:'drinks', img:'https://images.unsplash.com/photo-1515823064-d6e0c04616a7?auto=format&fit=crop&w=800&q=80'},
+
+{id:41, name:'Соус томатный', price:150, category:'sauce', img:'https://images.unsplash.com/photo-1604908177448-8f3bdb3b5c4f?auto=format&fit=crop&w=800&q=80'},
+{id:42, name:'Соус барбекю', price:170, category:'sauce', img:'https://images.unsplash.com/photo-1615486367077-8b0a0a9f2d4d?auto=format&fit=crop&w=800&q=80'},
+{id:43, name:'Чесночный соус', price:120, category:'sauce', img:'https://images.unsplash.com/photo-1589308078054-832a71f4db40?auto=format&fit=crop&w=800&q=80'},
+{id:44, name:'Соус васаби', price:130, category:'sauce', img:'https://images.unsplash.com/photo-1582450871972-ab5ca641643d?auto=format&fit=crop&w=800&q=80'},
+
+{id:45, name:'Брускетта с томатами', price:650, category:'appetizer', img:'https://images.unsplash.com/photo-1506280754576-f6fa8a873550?auto=format&fit=crop&w=800&q=80'},
+{id:46, name:'Креветки на гриле', price:2100, category:'appetizer', img:'https://images.unsplash.com/photo-1504674900247-ec6e8c3b6c0c?auto=format&fit=crop&w=800&q=80'},
+{id:50, name:'Дольки запечённого картофеля', price:850, category:'side', img:'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?auto=format&fit=crop&w=800&q=80'}
+];
+
+// Utils localStorage
+function load(key, def){ try{ return JSON.parse(localStorage.getItem(key)) ?? def; }catch(e){return def;} }
+function save(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+
+let state = { user: load('user', null), cart: load('cart', []), orders: load('orders', []), nextOrderId: load('nextOrderId', 1), tempCheckout: null };
+
+// track current view and throttle rapid calls to avoid UI flicker
+let _currentView = null;
+let _showViewCalls = 0;
+let _showViewLastReset = Date.now();
+function showView(name){
+    const now = Date.now();
+    if(now - _showViewLastReset > 1000){ _showViewCalls = 0; _showViewLastReset = now; }
+    _showViewCalls++;
+    // protect against runaway calls: bail out if too many within short time
+    if(_showViewCalls > 200){
+        console.warn('showView throttled due to rapid calls');
+        return;
+    }
+    try{
+        if(_currentView === name) return; // already visible — nothing to do
+        // batch DOM updates to next frame to avoid UI jank
+        window.requestAnimationFrame(()=>{
+            try{
+                document.querySelectorAll('[id^="view-"]').forEach(v=>v.classList.add('hidden'));
+                const el = document.getElementById('view-'+name);
+                if(el) { el.classList.remove('hidden'); _currentView = name; }
+            }catch(err){ console.error('showView DOM update failed', err); }
+        });
+    }catch(err){ console.error('showView failed', err); }
+}
+
+// keep track of current menu filter so that delegated handlers know what to re-render
+let lastFilter = 'all';
+
+// Login
+const _loginForm = document.getElementById('login-form');
+if(_loginForm){
+    _loginForm.addEventListener('submit', e=>{
+        e.preventDefault();
+        // prevent other submit listeners from running (defensive)
+        if(e.stopImmediatePropagation) try{ e.stopImmediatePropagation(); }catch(_){ }
+        try{
+            const uEl = document.getElementById('login-username');
+            const pEl = document.getElementById('login-password');
+            const u = uEl ? String(uEl.value).trim() : '';
+            const p = pEl ? String(pEl.value).trim() : '';
+            if(u==='admin' && p==='admin'){
+                state.user={role:'admin', name:'admin'}; saveState(); openAdmin();
+            } else if(u==='client' && p==='client'){
+                state.user={role:'client', name:'client'}; saveState(); openClientMenu();
+            } else {
+                alert('Неверный логин/пароль. Попробуйте admin/admin или client/client');
+            }
+        }catch(err){
+            console.error('Login handler error', err);
+            alert('Ошибка при входе — проверьте консоль.');
+        }
+    });
+}
+
+// format card input: allow only digits, max 16, group by 4
+const payCard = document.getElementById('pay-card');
+if(payCard){
+    payCard.addEventListener('input', (e)=>{
+        const digits = e.target.value.replace(/\D/g,'').slice(0,16);
+        const groups = digits.match(/.{1,4}/g);
+        e.target.value = groups ? groups.join(' ') : digits;
+    });
+    payCard.addEventListener('keydown', (e)=>{
+        // prevent entering non-digit except navigation and space
+        if(e.key.length===1 && /\D/.test(e.key)) e.preventDefault();
+    });
+}
+
+function saveState(){ save('orders', state.orders); save('nextOrderId', state.nextOrderId); save('cart', state.cart); save('user', state.user); }
+
+// adjust header buttons visibility based on current user role
+function updateHeaderForUser(){
+    const ha = document.querySelector('.header-actions');
+    const navCart = document.getElementById('nav-cart');
+    const navOrders = document.getElementById('nav-orders');
+    const logoutClient = document.getElementById('logout-client');
+    if(!ha) return;
+    if(state.user && state.user.role === 'client'){
+        ha.style.display = 'flex';
+        if(navCart) navCart.style.display = 'inline-flex';
+        if(navOrders) navOrders.style.display = 'inline-block';
+        if(logoutClient) logoutClient.style.display = 'inline-block';
+    } else {
+        // hide header actions for non-client users (admin or not logged)
+        ha.style.display = 'none';
+    }
+}
+
+// Open client menu
+function openClientMenu(){
+    showView('client-menu');
+    const cn = document.getElementById('client-name'); if(cn) cn.textContent = state.user?.name || '';
+    renderMenu();
+    updateHeaderForUser();
+}
+
+// Open admin
+function openAdmin(){
+    showView('admin');
+    renderAdmin();
+    updateHeaderForUser();
+}
+
+// Logout
+const _logoutAdminBtn = document.getElementById('logout-admin');
+if(_logoutAdminBtn) _logoutAdminBtn.addEventListener('click', ()=>{ state.user=null; saveState(); showView('login'); updateHeaderForUser(); });
+const _logoutClientBtn = document.getElementById('logout-client');
+if(_logoutClientBtn) _logoutClientBtn.addEventListener('click', ()=>{ state.user=null; saveState(); showView('login'); updateHeaderForUser(); });
+
+// Menu & filters
+function renderMenu(filter='all'){ 
+    lastFilter = filter;
+    const el=document.getElementById('menu-area'); if(!el) return; 
+    try{
+        el.innerHTML='';
+        // create fragment to reduce reflows
+        const frag = document.createDocumentFragment();
+        products.filter(p=>filter==='all'||p.category===filter).forEach(p=>{
+            const inCart = (state.cart.find(i=>i.id===p.id) || {qty:0}).qty;
+            const d=document.createElement('div'); d.className='product card';
+            const controlsHtml = inCart>0 ? `<div class="qty-controls" data-id="${p.id}"><button class="dec" type="button">−</button><span class="qty">${inCart}</span><button class="inc" type="button">+</button></div>` : `<button data-id="${p.id}" class="add-btn" type="button">В корзину</button>`;
+            d.innerHTML = `<img src="${p.img}" alt=""><div class="info"><h4>${p.name}</h4><div class="price">${p.price}₸</div><div style="margin-top:8px; display:flex; justify-content:center; gap:8px;">${controlsHtml}</div></div>`;
+            frag.appendChild(d);
+        });
+        el.appendChild(frag);
+    }catch(err){ console.error('renderMenu failed', err); }
+}
+// delegate clicks inside menu-area rather than rebinding constantly
+const menuArea = document.getElementById('menu-area');
+if(menuArea){
+    menuArea.addEventListener('click', e=>{
+        const target = e.target;
+        // add button (use closest to support clicks on inner elements)
+        const addBtn = target.closest ? target.closest('.add-btn') : null;
+        if(addBtn){
+            const id = Number(addBtn.dataset.id);
+            const prod = products.find(p=>p.id===id);
+            if(prod){ addToCart(prod); renderMenu(lastFilter); updateCartBadge(); }
+            return;
+        }
+        // qty controls (use closest to find the control wrapper)
+        const qtyWrap = target.closest ? target.closest('.qty-controls') : null;
+        if(qtyWrap){
+            const id = Number(qtyWrap.dataset.id);
+            if(target.classList.contains('inc') || target.matches('.inc')){ changeQty(id,1); }
+            else if(target.classList.contains('dec') || target.matches('.dec')){ changeQty(id,-1); }
+            renderMenu(lastFilter); updateCartBadge(); safeRenderCart();
+        }
+    });
+}
+// filter buttons
+document.querySelectorAll('.hotbar button').forEach(b=>b.addEventListener('click', ()=>{ try{ renderMenu(b.dataset.filter); }catch(err){ console.error('Filter click handler failed', err); } }));
+
+// Navigation buttons (guarded)
+const _navCartBtn = document.getElementById('nav-cart'); if(_navCartBtn) _navCartBtn.addEventListener('click', ()=>{ try{ safeRenderCart(); showView('cart'); }catch(err){ console.error('navCart click failed', err); } });
+const _navOrdersBtn = document.getElementById('nav-orders'); if(_navOrdersBtn) _navOrdersBtn.addEventListener('click', ()=>{ renderOrders(); showView('client-orders'); });
+const _cartBackBtn = document.getElementById('cart-back'); if(_cartBackBtn) _cartBackBtn.addEventListener('click', ()=>{ openClientMenu(); });
+const _ordersBackBtn = document.getElementById('orders-back'); if(_ordersBackBtn) _ordersBackBtn.addEventListener('click', ()=>{ openClientMenu(); });
+
+// Cart
+function addToCart(p){ const existing = state.cart.find(i=>i.id===p.id); if(existing){ existing.qty++; } else state.cart.push({id:p.id, name:p.name, price:p.price, qty:1}); saveState(); updateCartBadge(); }
+function changeQty(productId, delta){ const it = state.cart.find(i=>i.id===productId); if(!it && delta>0){ const prod = products.find(p=>p.id===productId); if(prod) state.cart.push({id:prod.id, name:prod.name, price:prod.price, qty:1}); }
+else if(it){ it.qty += delta; if(it.qty<=0){ state.cart = state.cart.filter(x=>x.id!==productId); } }
+ saveState(); updateCartBadge(); }
+function renderCart(){ const el=document.getElementById('cart-items'); el.innerHTML=''; state.cart.forEach(item=>{ const it=document.createElement('div'); it.className='list-item'; it.innerHTML=`<div style="display:flex; justify-content:space-between; align-items:center;"><div style="display:flex; align-items:center; gap:10px;"><button class="dec-item" data-id="${item.id}" type="button">−</button><div>${item.name}</div><button class="inc-item" data-id="${item.id}" type="button">+</button></div><div>${item.price*item.qty}₸</div></div><div style="margin-top:6px;">Количество: <b>${item.qty}</b></div>`; el.appendChild(it); }); document.getElementById('cart-total').textContent = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+    // attach listeners
+    document.querySelectorAll('.inc-item').forEach(b=>b.addEventListener('click', ()=>{ changeQty(Number(b.dataset.id), 1); renderCart(); updateCartBadge(); renderMenu(); }));
+    document.querySelectorAll('.dec-item').forEach(b=>b.addEventListener('click', ()=>{ changeQty(Number(b.dataset.id), -1); renderCart(); updateCartBadge(); renderMenu(); }));
+ }
+// make renderCart more resilient to errors
+function safeRenderCart(){
+    try{ renderCart(); }catch(err){ console.error('renderCart failed', err); }
+}
+
+function updateCartBadge(){ const c = state.cart.reduce((s,i)=>s+i.qty,0); const el = document.getElementById('cart-count-badge'); if(!el) return; if(c<=0){ el.style.display='none'; } else { el.style.display='inline-flex'; el.textContent = c; } }
+const _clearCartBtn = document.getElementById('clear-cart'); if(_clearCartBtn) _clearCartBtn.addEventListener('click', ()=>{ try{ if(confirm('Очистить корзину?')){ state.cart=[]; saveState(); safeRenderCart(); updateCartBadge(); renderMenu(); } }catch(err){ console.error('clear cart failed', err); } });
+
+// Checkout flow: cart -> address -> payment -> complete
+const _toAddressBtn = document.getElementById('to-address'); if(_toAddressBtn) _toAddressBtn.addEventListener('click', ()=>{ try{ if(state.cart.length===0){ alert('Корзина пуста'); return; } safeRenderCart(); showView('address'); }catch(err){ console.error('to-address click failed', err); } });
+const _addressBackBtn = document.getElementById('address-back'); if(_addressBackBtn) _addressBackBtn.addEventListener('click', ()=>{ showView('cart'); });
+const _formAddress = document.getElementById('form-address'); if(_formAddress) _formAddress.addEventListener('submit', e=>{ e.preventDefault(); const addrEl = document.getElementById('address'); const commentEl = document.getElementById('comment'); const addr = addrEl ? addrEl.value.trim() : ''; const comment = commentEl ? commentEl.value.trim() : ''; if(!addr){ alert('Введите адрес'); return; } state.tempCheckout = { address: addr, comment }; saveState(); showView('payment'); });
+
+// Payment
+const _paymentBackBtn = document.getElementById('payment-back'); if(_paymentBackBtn) _paymentBackBtn.addEventListener('click', ()=>{ showView('address'); });
+const _payNowBtn = document.getElementById('pay-now'); if(_payNowBtn) _payNowBtn.addEventListener('click', ()=>{
+    const cardEl = document.getElementById('pay-card'); const expEl = document.getElementById('pay-exp'); const cvvEl = document.getElementById('pay-cvv');
+    const card = cardEl ? cardEl.value.replace(/\s+/g,'') : '';
+    const exp = expEl ? expEl.value.trim() : '';
+    const cvv = cvvEl ? cvvEl.value.trim() : '';
+    if(!/^[0-9]{12,19}$/.test(card)){ alert('Неверный номер карты '); return; }
+    if(!/^[0-9]{3,4}$/.test(cvv)){ alert('Неверный CVV'); return; }
+    // create order
+    const id = state.nextOrderId++; const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
+    const order = { id, items: JSON.parse(JSON.stringify(state.cart)), total, address: state.tempCheckout?.address||'', comment: state.tempCheckout?.comment||'', card: '****'+card.slice(-4), status:'принят', paid:true, client:state.user?.name||'guest', created: new Date().toISOString() };
+    state.orders.push(order); state.cart=[]; state.tempCheckout=null; saveState(); alert('Оплата принята — заказ №'+order.id); renderOrders(); showView('client-orders'); renderAdmin(); });
+
+// Client orders
+function renderOrders(){ const el=document.getElementById('orders-list'); el.innerHTML=''; if(!state.user) return; const my = state.orders.filter(o=>o.client===state.user.name); if(my.length===0){ el.innerHTML='<div class="small">Нет заказов</div>'; return; } my.slice().reverse().forEach(o=>{ const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div style="display:flex;justify-content:space-between"><div>№${o.id} — ${o.status}</div><div>${o.total}₸</div></div><div class="small">${o.created.split('T')[0]}</div><div style="margin-top:6px;"><button data-id="${o.id}" class="view-order">Подробнее</button></div>`; el.appendChild(d); d.querySelector('.view-order').addEventListener('click', ()=>{ renderOrderDetail(o.id); showView('client-order'); }); }); }
+
+function renderOrderDetail(id){ const o = state.orders.find(x=>x.id===id); if(!o) return; const el = document.getElementById('client-order-detail'); let html = `<div><b>Заказ №${o.id}</b> — <span class="small">${o.status}</span></div><div class="small">Дата: ${o.created.split('T')[0]}</div><div style="margin-top:8px;"><b>Адрес:</b> ${o.address || '-'}<br><b>Комментарий:</b> ${o.comment || '-'}</div><div style="margin-top:8px;"><b>Содержимое:</b><ul>`; o.items.forEach(it=> html += `<li>${it.name} × ${it.qty} — ${it.price*it.qty}₸</li>`); html += `</ul></div><div style="margin-top:8px;"><b>Итого:</b> ${o.total}₸</div>`; el.innerHTML = html; const backBtn = document.getElementById('client-order-back'); if(backBtn){ backBtn.onclick = ()=>{ renderOrders(); showView('client-orders'); }; } }
+
+// Admin
+function renderAdmin(){ const el=document.getElementById('admin-list'); el.innerHTML=''; const list = state.orders.filter(o=>o.paid && o.status!=='выдан'); if(list.length===0){ el.innerHTML='<div class="small">Нет текущих оплаченных заказов</div>'; return; } list.slice().reverse().forEach(o=>{ const d=document.createElement('div'); d.className='list-item'; d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><div>№${o.id} — ${o.client}</div><div>${o.total}₸</div></div><div class="small">${o.created}</div><div style="margin-top:8px;"><button data-id="${o.id}" class="admin-view">Просмотреть</button></div>`; el.appendChild(d); d.querySelector('.admin-view').addEventListener('click', ()=>{ renderAdminOrderDetail(o.id); showView('admin-order'); }); }); }
+
+function renderAdminOrderDetail(id){ const o = state.orders.find(x=>x.id===id); if(!o) return; const el = document.getElementById('admin-order-detail'); let html = `<div><b>Заказ №${o.id}</b> — <span class="small">${o.status}</span></div><div class="small">Клиент: ${o.client} • ${o.created}</div><div style="margin-top:8px;"><b>Адрес:</b> ${o.address || '-'}<br><b>Комментарий:</b> ${o.comment || '-'}</div><div style="margin-top:8px;"><b>Содержимое:</b><ul>`; o.items.forEach(it=> html += `<li>${it.name} × ${it.qty} — ${it.price*it.qty}₸</li>`); html += `</ul></div><div style="margin-top:8px;"><b>Итого:</b> ${o.total}₸</div>`; html += `<div style="margin-top:12px;"><label>Статус: <select id="admin-status-select"><option value="принят">принят</option><option value="готовится">готовится</option><option value="собирается">собирается</option><option value="готов">готов</option><option value="выдан">выдан</option></select></label> <button id="admin-save-status">Сохранить</button></div>`; el.innerHTML = html; const sel = document.getElementById('admin-status-select'); if(sel) sel.value = o.status || 'принят'; const saveBtn = document.getElementById('admin-save-status'); if(saveBtn){ saveBtn.onclick = ()=>{ const newStatus = sel.value; o.status = newStatus; saveState(); renderAdmin(); renderOrders(); alert('Статус обновлён'); showView('admin'); }; } const backBtn = document.getElementById('admin-order-back'); if(backBtn){ backBtn.onclick = ()=>{ renderAdmin(); showView('admin'); }; } }
+
+// Initial rendering if user persisted
+if(state.user && state.user.role==='client') openClientMenu();
+else if(state.user && state.user.role==='admin') openAdmin();
+else showView('login');
+
+// update badge on load
+updateCartBadge();
+// update header controls on load
+updateHeaderForUser();
+
+// --- Предотвращаем случайные перезагрузки и навигацию (поддержка SPA) ---
+// Блокируем клавиши перезагрузки (F5, Ctrl/Cmd+R)
+document.addEventListener('keydown', function(e){
+    try{
+        if(e.key === 'F5' || ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'R'))){
+            e.preventDefault();
+            console.warn('Перезагрузка страницы заблокирована (SPA). Используйте навигацию внутри приложения.');
+        }
+    }catch(err){ }
+});
+
+// Блокируем отправку форм, если она не была обработана (чтобы не было навигации/перезагрузки)
+document.addEventListener('submit', function(e){
+    if(!e.defaultPrevented){
+        e.preventDefault();
+        console.warn('Отмена отправки формы — обработка должна происходить через JS (SPA).');
+    }
+});
+
+// Предотвращаем переход по внутренним ссылкам без явной необходимости
+document.addEventListener('click', function(e){
+    const a = e.target.closest ? e.target.closest('a') : null;
+    if(a){
+        const href = a.getAttribute('href');
+        if(href && !href.startsWith('http') && !href.startsWith('#')){
+            e.preventDefault();
+            console.warn('Внутренняя навигация по ссылке заблокирована ( SPA).');
+        }
+    }
+});
+
+// Expose for console (debug)
+window._FE = { state, renderAdmin, renderOrders };
+// Global error handler to avoid uncaught exceptions causing unpredictable behaviour
+window.addEventListener('error', function(evt){
+    try{ console.error('Unhandled error:', evt.error || evt.message, evt); }catch(e){}
+    // prevent default browser handling where possible
+    try{ evt.preventDefault(); }catch(e){}
+});
+
+// Handle unhandled promise rejections to avoid silent failures
+window.addEventListener('unhandledrejection', function(evt){
+    try{
+        console.error('Unhandled rejection:', evt.reason);
+        // prevent default to avoid the browser's console noise
+        if(evt.preventDefault) evt.preventDefault();
+    }catch(e){}
+});
+
+// Prevent accidental unload/navigation when user has items in cart or an in-progress checkout
+window.addEventListener('beforeunload', function(evt){
+    try{
+        if(state.cart && state.cart.length>0 || state.tempCheckout){
+            // standard message is ignored by modern browsers, but returning a value triggers the prompt
+            const msg = 'У вас есть незавершённый заказ — покидать страницу?';
+            (evt || window.event).returnValue = msg;
+            return msg;
+        }
+    }catch(e){}
+});
+</script>
+</body>
+</html>
