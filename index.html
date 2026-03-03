@@ -161,67 +161,67 @@
 <script>
 // Demo data
 const products = [
-{id:1, name:'Бургер Классический', price:1500, category:'burger', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'},
-{id:2, name:'Чизбургер', price:1650, category:'burger', img:'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80'},
-{id:3, name:'Бургер BBQ', price:1750, category:'burger', img:'https://images.unsplash.com/photo-1600891964092-4316c288032e?auto=format&fit=crop&w=800&q=80'},
+{id:1, name:'Бургер Классический', price:1500, category:'burger', img:'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80'},
+{id:2, name:'Чизбургер', price:1650, category:'burger', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80'},
+{id:3, name:'Бургер BBQ', price:1750, category:'burger', img:'https://png.pngtree.com/png-clipart/20231024/original/pngtree-halloween-burger-with-bbq-sauce-and-potatoes-angle-view-png-image_13404396.png'},
 {id:4, name:'Пикантный бургер с беконом', price:1900, category:'burger', img:'https://images.unsplash.com/photo-1553979459-d2229ba7433b?auto=format&fit=crop&w=800&q=80'},
 {id:5, name:'Вегетарианский бургер', price:1400, category:'burger', img:'https://images.unsplash.com/photo-1520072959219-c595dc870360?auto=format&fit=crop&w=800&q=80'},
 
-{id:6, name:'Маргарита (пицца)', price:2200, category:'pizza', img:'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=800&q=80'},
-{id:7, name:'Пепперони (пицца)', price:2600, category:'pizza', img:'https://images.unsplash.com/photo-1594007654729-407eedc4be65?auto=format&fit=crop&w=800&q=80'},
-{id:8, name:'Четыре сыра (пицца)', price:2700, category:'pizza', img:'https://images.unsplash.com/photo-1548365328-9f547fb0953d?auto=format&fit=crop&w=800&q=80'},
-{id:9, name:'Пицца с курицей и грибами', price:2550, category:'pizza', img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80'},
+{id:6, name:'Маргарита , price:2200, category:'pizza', img:'https://images.unsplash.com/photo-1604068549290-dea0e4a305ca?auto=format&fit=crop&w=800&q=80'},
+{id:7, name:'Пепперони', price:2600, category:'pizza', img:'https://nicecook.ru/wp-content/uploads/2020/05/domashnyaya-picca-pepperoni-gotovaya-picca.jpg'},
+{id:8, name:'Четыре сыра', price:2700, category:'pizza', img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=80'},
+{id:9, name:'Пицца с курицей и грибами', price:2550, category:'pizza', img:'hhttps://img.freepik.com/premium-photo/isolated-chicken-pizza-with-mushrooms_219193-8128.jpg?w=360'},
 {id:10, name:'Острая гавайская', price:2400, category:'pizza', img:'https://images.unsplash.com/photo-1601924579440-0f2d3f6d63d8?auto=format&fit=crop&w=800&q=80'},
 
 {id:11, name:'Картошка фри', price:900, category:'side', img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?auto=format&fit=crop&w=800&q=80'},
 {id:12, name:'Луковые кольца', price:700, category:'side', img:'https://images.unsplash.com/photo-1639024471283-03518883512d?auto=format&fit=crop&w=800&q=80'},
-{id:13, name:'Куриные наггетсы', price:950, category:'side', img:'https://images.unsplash.com/photo-1604908554007-1d8b4e3c8b5d?auto=format&fit=crop&w=800&q=80'},
+{id:13, name:'Куриные наггетсы', price:950, category:'side', img:'https://cdn-kz3.foodpicasso.com/assets/2024/12/23/c178ddd12872f01822585a9b715c75d3---jpg_1000x_103c0_convert.jpg'},
 
-{id:14, name:'Суп том-ям', price:1100, category:'soup', img:'https://images.unsplash.com/photo-1604908812009-66b7d8e0f299?auto=format&fit=crop&w=800&q=80'},
-{id:15, name:'Крем-суп из грибов', price:900, category:'soup', img:'https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=800&q=80'},
-{id:16, name:'Борщ со сметаной', price:850, category:'soup', img:'https://images.unsplash.com/photo-1617196038435-d58a9a9b7353?auto=format&fit=crop&w=800&q=80'},
-{id:17, name:'Суп с фрикадельками', price:800, category:'soup', img:'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=800&q=80'},
+{id:14, name:'Суп том-ям', price:1100, category:'soup', img:'https://img.freepik.com/premium-photo/tom-yam-thai-soup-isolated-white_93675-109704.jpg'},
+{id:15, name:'Крем-суп из грибов', price:900, category:'soup', img:'https://img.freepik.com/premium-photo/mushroom-soup-bowl-isolated-white-background_92534-3489.jpg'},
+{id:16, name:'Борщ со сметаной', price:850, category:'soup', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRTHq3Y13lRuTbDcLo89UFW5QzCBE_MtVMbtw&s'},
+{id:17, name:'Суп с фрикадельками', price:800, category:'soup', img:'https://img.freepik.com/premium-photo/soup-with-turkey-meatballs-white-background_690179-4482.jpg'},
 
-{id:18, name:'Шашлык из свинины (6 шампуров)', price:2800, category:'shashlik', img:'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?auto=format&fit=crop&w=800&q=80'},
-{id:19, name:'Шашлык из курицы (6 шампуров)', price:2400, category:'shashlik', img:'https://images.unsplash.com/photo-1625944525903-b0c3a7e5c8c8?auto=format&fit=crop&w=800&q=80'},
-{id:20, name:'Люля-кебаб говяжий', price:2600, category:'shashlik', img:'https://images.unsplash.com/photo-1626200419199-391ae4be7c15?auto=format&fit=crop&w=800&q=80'},
+{id:18, name:'Шашлык из баранины (6 кусков)', price:2800, category:'shashlik', img:'https://st2.depositphotos.com/2892873/8121/i/450/depositphotos_81216838-stock-photo-hot-roasted-meat-shish-kebab.jpg'},
+{id:19, name:'Шашлык из курицы (6 кусков)', price:2400, category:'shashlik', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTav7mMJ9URrcT1prDDDzyG35rvT6tKYv8Dkg&s'},
+{id:20, name:'Люля-кебаб говяжий', price:2600, category:'shashlik', img:'https://png.klev.club/uploads/posts/2024-06/png-klev-club-zpqw-p-lyulya-png-2.png'},
 
-{id:21, name:'Суши сет (16 шт)', price:3200, category:'sushi', img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=800&q=80'},
-{id:22, name:'Ролл Калифорния (8 шт)', price:1500, category:'sushi', img:'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=800&q=80'},
-{id:23, name:'Филадельфия (8 шт)', price:1700, category:'sushi', img:'https://images.unsplash.com/photo-1617191519221-9a0b6a4f4e6a?auto=format&fit=crop&w=800&q=80'},
+{id:21, name:'Суши сет (24 шт)', price:3200, category:'sushi', img:'https://yasumaki.com/f/files/265084/49/24/menu-image-990473a8aca458c7ddbce18928227848-w455.png'},
+{id:22, name:'Ролл Калифорния (8 шт)', price:1500, category:'sushi', img:'https://mybox-menu.storage.yandexcloud.net/productDetail/AE09078B-27E1-41D0-9026-4259975A6AD1?AWSAccessKeyId=nBfHjt3yHLl_tqKfFNBy&Expires=2373013151&Signature=v9WMrlLtAwsPf4ATg%2Fdj73QXSYE%3D'},
+{id:23, name:'Филадельфия (8 шт)', price:1700, category:'sushi', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSf95_1u6GJVV5li20jBPlUqrfUDpthENjm8A&s'},
 {id:24, name:'Ролл острый (8 шт)', price:1600, category:'sushi', img:'https://images.unsplash.com/photo-1582450871972-ab5ca641643d?auto=format&fit=crop&w=800&q=80'},
-{id:47, name:'Суши-ролл ассорти (12 шт)', price:2400, category:'sushi', img:'https://images.unsplash.com/photo-1583623025817-d180a2221d0a?auto=format&fit=crop&w=800&q=80'},
+{id:47, name:'Суши сет (16 шт)', price:2400, category:'sushi', img:'hhttps://cdn.starterapp.ru/w:1024/aHR0cHM6Ly9jZG4uc2FuaXR5LmlvL2ltYWdlcy9scmgzdjB3MC9wcm9kdWN0aW9uLzM4ZTdlNzMxNzdlNGQ5OWY1M2Y0NWQxZGU1NGI3YjA5MDk0Yzc3NTktMTgyMHgxODIwLnBuZw=='},
 
 {id:33, name:'Салат Цезарь', price:1200, category:'salad', img:'https://images.unsplash.com/photo-1550304943-4f24f54ddde9?auto=format&fit=crop&w=800&q=80'},
 {id:34, name:'Греческий салат', price:1100, category:'salad', img:'https://images.unsplash.com/photo-1608032077018-c9aad9565d29?auto=format&fit=crop&w=800&q=80'},
 {id:35, name:'Салат с тунцом', price:1350, category:'salad', img:'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=800&q=80'},
 
-{id:36, name:'Лапша с курицей', price:1300, category:'main', img:'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80'},
+{id:36, name:'Удон с курицей', price:1300, category:'main', img:'https://img.freepik.com/premium-photo/asian-fried-buckwheat-noodles-with-chicken-vegetables-isolated-white-background-japanese-fried-noodles-teriyaki-ceramic-bowl-fried-wok-soba-with-chicken-minimal-style-wok-menu_116118-3397.jpg'},
 {id:37, name:'Стейк рибай', price:3800, category:'main', img:'https://images.unsplash.com/photo-1558030006-450675393462?auto=format&fit=crop&w=800&q=80'},
-{id:38, name:'Паста Карбонара', price:1450, category:'main', img:'https://images.unsplash.com/photo-1603133872878-684f208fb84b?auto=format&fit=crop&w=800&q=80'},
-{id:39, name:'Ризотто с грибами', price:1600, category:'main', img:'https://images.unsplash.com/photo-1476124369491-e7addf5db371?auto=format&fit=crop&w=800&q=80'},
+{id:38, name:'Паста Карбонара', price:1450, category:'main', img:'https://img.freepik.com/premium-photo/pasta-carbonara-with-spaghetti-isolated-white_93675-99663.jpg'},
+{id:39, name:'Ризотто с грибами', price:1600, category:'main', img:'https://img.freepik.com/premium-photo/risotto-with-mushrooms-isolated-white-background_185193-75132.jpg'},
 {id:49, name:'Панини с ветчиной', price:950, category:'main', img:'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=800&q=80'},
 
 {id:29, name:'Чизкейк', price:700, category:'dessert', img:'https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=800&q=80'},
 {id:30, name:'Мороженое', price:450, category:'dessert', img:'https://images.unsplash.com/photo-1563805042-7684c019e1cb?auto=format&fit=crop&w=800&q=80'},
 {id:31, name:'Тирамису', price:750, category:'dessert', img:'https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80'},
-{id:32, name:'Круассан с шоколадом', price:350, category:'dessert', img:'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=800&q=80'},
+{id:32, name:'Круассан с шоколадом', price:350, category:'dessert', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSe1NMLF7W1T2965VJGfMIUagFkEa_BX-TKUQ&s'},
 
-{id:25, name:'Кока-кола', price:400, category:'drinks', img:'https://images.unsplash.com/photo-1624517452488-04869289c4ca?auto=format&fit=crop&w=800&q=80'},
-{id:26, name:'Фреш апельсиновый', price:500, category:'drinks', img:'https://images.unsplash.com/photo-1553531889-56cc480ac5cb?auto=format&fit=crop&w=800&q=80'},
-{id:27, name:'Чай зелёный', price:250, category:'drinks', img:'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80'},
+{id:25, name:'Кока-кола', price:400, category:'drinks', img:'https://cdn-kz3.foodpicasso.com/assets/70/00/cf/7f/7000cf7f94c6eb7d407c779c9c344ae4---jpg_420x420:whitepadding15_94310_convert.jpg'},
+{id:26, name:'Фреш апельсиновый', price:500, category:'drinks', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTMh8sF39c9kYGIfkTBBn4Eai4MHOuUoCHhJg&s'},
+{id:27, name:'Чай зелёный', price:250, category:'drinks', img:'https://img.freepik.com/premium-photo/cups-green-tea-table-wooden-background_55883-7357.jpg'},
 {id:28, name:'Кофе латте', price:450, category:'drinks', img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=800&q=80'},
-{id:40, name:'Бокал пива (0.5 л)', price:700, category:'drinks', img:'https://images.unsplash.com/photo-1515165562835-cf4a6f2b7c5d?auto=format&fit=crop&w=800&q=80'},
+{id:40, name:'Черный чай', price:700, category:'drinks', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbkN3ac32LtbkSarTBA_ppldBkTgGJspjDpA&s'},
 {id:48, name:'Чай масала', price:300, category:'drinks', img:'https://img.freepik.com/premium-photo/traditional-indian-masala-chai-tea-white-cup-with-spiced-with-copy-space-blue-background_542566-347.jpg'},
 
-{id:41, name:'Соус томатный', price:150, category:'sauce', img:'https://images.unsplash.com/photo-1604908177448-8f3bdb3b5c4f?auto=format&fit=crop&w=800&q=80'},
-{id:42, name:'Соус барбекю', price:170, category:'sauce', img:'https://images.unsplash.com/photo-1615486367077-8b0a0a9f2d4d?auto=format&fit=crop&w=800&q=80'},
-{id:43, name:'Чесночный соус', price:120, category:'sauce', img:'https://images.unsplash.com/photo-1589308078054-832a71f4db40?auto=format&fit=crop&w=800&q=80'},
-{id:44, name:'Соус васаби', price:130, category:'sauce', img:'https://images.unsplash.com/photo-1582450871972-ab5ca641643d?auto=format&fit=crop&w=800&q=80'},
-
+{id:41, name:'Соус томатный', price:150, category:'sauce', img:'https://produktoff.kz/pictures/product/big/15732_big.png'},
+{id:42, name:'Соус барбекю', price:170, category:'sauce', img:'https://broilkingbbq.com.ru/wp-content/uploads/2019/04/city-bbq-sauce.jpg'},
+{id:43, name:'Чесночный соус', price:120, category:'sauce', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZ9BBjRMW8i5eNx1VnteMmoGd_NievFzUl7Q&s'},
+{id:44, name:'Соус васаби', price:130, category:'sauce', img:'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2qUtZwe5t6LrYaObqSqnOMevzgpb4Clsk6g&s'},
+    
 {id:45, name:'Брускетта с томатами', price:650, category:'appetizer', img:'https://images.unsplash.com/photo-1506280754576-f6fa8a873550?auto=format&fit=crop&w=800&q=80'},
 {id:46, name:'Креветки на гриле', price:2100, category:'appetizer', img:'https://images.unsplash.com/photo-1504674900247-ec6e8c3b6c0c?auto=format&fit=crop&w=800&q=80'},
-{id:50, name:'Дольки запечённого картофеля', price:850, category:'side', img:'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?auto=format&fit=crop&w=800&q=80'}
+{id:50, name:'Дольки запечённого картофеля', price:850, category:'side', img:'https://do-doma.kz/uploads/posts/2017-10/1508855647_4.jpg'}
 ];
 
 // Utils localStorage (оставляем корзину/пользователя локально; заказы теперь НЕ локальные)
@@ -792,6 +792,7 @@ window.addEventListener('beforeunload', function(evt){
 </script>
 </body>
 </html>
+
 
 
 
