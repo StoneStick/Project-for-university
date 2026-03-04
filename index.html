@@ -17,7 +17,7 @@
   color: white;
   text-align: center;
   padding: 40px 24px;
-  border-bottom: 4px solid #000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
 }
         .header-actions{
   position: absolute;
@@ -172,11 +172,27 @@
     <div id="view-admin" class="hidden">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2>Админ-панель</h2>
+            <div class="hotbar" id="admin-filter-bar">
+    <button data-status="all">Все</button>
+    <button data-status="принят">Принят</button>
+    <button data-status="готовится">Готовится</button>
+    <button data-status="собирается">Собирается</button>
+    <button data-status="готов">Готов</button>
+            </div>
             <div><button id="logout-admin">Выйти</button></div>
         </div>
         <p class="small">Панель — оплаченные текущие заказы</p>
+
+        <div class="hotbar" id="admin-filter-bar">
+        <button data-status="all">Все</button>
+        <button data-status="принят">Принят</button>
+        <button data-status="готовится">Готовится</button>
+        <button data-status="собирается">Собирается</button>
+        <button data-status="готов">Готов</button>
+        </div>
+
         <div id="admin-list" class="admin-list"></div>
-    </div>
+        </div>
 
     <!-- Client order detail page -->
     <div id="view-client-order" class="hidden card" style="padding:12px; margin-top:18px;">
@@ -424,6 +440,7 @@ function showView(name){
 
 // keep track of current menu filter so that delegated handlers know what to re-render
 let lastFilter = 'all';
+let adminStatusFilter = 'all';
 
 // Login
 const _loginForm = document.getElementById('login-form');
@@ -705,7 +722,11 @@ function renderOrderDetail(id){
 // Admin
 function renderAdmin(){
   const el=document.getElementById('admin-list'); el.innerHTML='';
-  const list = state.orders.filter(o=>o.paid && o.status!=='выдан');
+  let list = state.orders.filter(o=>o.paid && o.status!=='выдан');
+
+if(adminStatusFilter !== 'all'){
+  list = list.filter(o => o.status === adminStatusFilter);
+}
   if(list.length===0){ el.innerHTML='<div class="small">Нет текущих оплаченных заказов</div>'; return; }
   list.slice().reverse().forEach(o=>{
     const d=document.createElement('div'); d.className='list-item';
@@ -715,6 +736,17 @@ function renderAdmin(){
     el.appendChild(d);
     d.querySelector('.admin-view').addEventListener('click', ()=>{ renderAdminOrderDetail(o.id); showView('admin-order'); });
   });
+}
+const adminFilterBar = document.getElementById('admin-filter-bar');
+
+if(adminFilterBar){
+    adminFilterBar.addEventListener('click', (e)=>{
+        const btn = e.target.closest('button');
+        if(!btn) return;
+
+        adminStatusFilter = btn.dataset.status;
+        renderAdmin();
+    });
 }
 
 function renderAdminOrderDetail(id){
@@ -831,6 +863,7 @@ window.addEventListener('beforeunload', function(evt){
 </script>
 </body>
 </html>
+
 
 
 
