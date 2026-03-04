@@ -154,11 +154,11 @@
         <div style="max-width:420px;">
             <div style="background:#fff; padding:12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
                 <label>Номер карты</label>
-                <inpuаt id="pay-card" placeholder="1234 5678 9012 3456" required>
+                <input id="pay-card" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="1234 5678 9012 3456" required>
                 <label>Срок (MM/YY)</label>
-                <input id="pay-exp" placeholder="12/26" required>
+                <input id="pay-exp" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY" required>
                 <label>CVV</label>
-                <input id="pay-cvv" placeholder="123" required>
+                <input id="pay-cvv" inputmode="numeric" autocomplete="cc-csc" maxlength="3" placeholder="123" required>
                 <div style="margin-top:10px;"><button id="pay-now" type="button">Оплатить</button> <button id="payment-back" type="button">Назад</button></div>
             </div>
         </div>
@@ -473,6 +473,32 @@ if(payCard){
         if(e.key.length===1 && /\D/.test(e.key)) e.preventDefault();
     });
 }
+    // format exp input (MM/YY)
+const payExp = document.getElementById('pay-exp');
+if(payExp){
+  payExp.addEventListener('input', (e)=>{
+    let digits = e.target.value.replace(/\D/g,'').slice(0,4); // только 4 цифры MMYY
+    if(digits.length >= 3){
+      e.target.value = digits.slice(0,2) + '/' + digits.slice(2);
+    } else {
+      e.target.value = digits;
+    }
+  });
+  payExp.addEventListener('keydown', (e)=>{
+    if(e.key.length===1 && /\D/.test(e.key)) e.preventDefault();
+  });
+}
+
+// format cvv input (ровно 3 цифры)
+const payCvv = document.getElementById('pay-cvv');
+if(payCvv){
+  payCvv.addEventListener('input', (e)=>{
+    e.target.value = e.target.value.replace(/\D/g,'').slice(0,3);
+  });
+  payCvv.addEventListener('keydown', (e)=>{
+    if(e.key.length===1 && /\D/.test(e.key)) e.preventDefault();
+  });
+}
 
 // adjust header buttons visibility based on current user role
 function updateHeaderForUser(){
@@ -654,8 +680,20 @@ if(_payNowBtn) _payNowBtn.addEventListener('click', async ()=>{
   const exp = expEl ? expEl.value.trim() : '';
   const cvv = cvvEl ? cvvEl.value.trim() : '';
 
-  if(!/^[0-9]{12,19}$/.test(card)){ alert('Неверный номер карты '); return; }
-  if(!/^[0-9]{3,4}$/.test(cvv)){ alert('Неверный CVV'); return; }
+  if(!/^[0-9]{12,19}$/.test(card)){ alert('Неверный номер карты'); return; }
+  if(!/^\d{3}$/.test(cvv)){ alert('Неверный CVV (нужно ровно 3 цифры)'); return; }
+
+  if(!/^\d{2}\/\d{2}$/.test(exp)){
+  alert('Неверный срок (нужно MM/YY)');
+  return;
+}
+
+// (опционально) проверка месяца 01-12
+const mm = Number(exp.slice(0,2));
+if(mm < 1 || mm > 12){
+  alert('Неверный месяц в сроке (01-12)');
+  return;
+}
 
   // ✅ Создаём заказ (в Firebase)
   const total = state.cart.reduce((s,i)=>s+i.price*i.qty,0);
@@ -866,6 +904,7 @@ window.addEventListener('beforeunload', function(evt){
 </script>
 </body>
 </html>
+
 
 
 
