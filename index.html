@@ -13,9 +13,7 @@
   right: 0;
   z-index: 1000;
 
-  background:
-    linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.15)),
-    url('https://images.unsplash.com/photo-1548365328-5b8a7b8a3d0b?q=80&w=1400&auto=format&fit=crop') center/cover no-repeat;
+  background: #000 url('https://images.unsplash.com/photo-1548365328-5b8a7b8a3d0b?auto=format&fit=crop&w=1400&q=80') center/cover no-repeat;
 
   color: white;
   text-align: center;
@@ -25,10 +23,9 @@
   position: absolute;
   right: 20px;
   top: 18px;
-  display: flex;      /* вместо none */
+  display: flex;
   gap: 8px;
   align-items: center;
-  visibility: hidden; /* скрываем, но место оставляем */
 }
         nav { background: #222; padding: 10px; text-align: center; }
         nav a { color: white; margin: 0 12px; text-decoration: none; font-weight: bold; }
@@ -451,21 +448,24 @@ if(payCard){
 
 // adjust header buttons visibility based on current user role
 function updateHeaderForUser(){
-    const ha = document.querySelector('.header-actions');
-    const navCart = document.getElementById('nav-cart');
-    const navOrders = document.getElementById('nav-orders');
-    const logoutClient = document.getElementById('logout-client');
-    if(!ha) return;
-    if(state.user && state.user.role === 'client'){
-        ha.style.display = 'flex';
-        if(navCart) navCart.style.display = 'inline-flex';
-        if(navOrders) navOrders.style.display = 'inline-block';
-        if(logoutClient) logoutClient.style.display = 'inline-block';
-    } else {
-        ha.style.display = 'none';
-    }
-}
+  const ha = document.querySelector('.header-actions');
+  const navCart = document.getElementById('nav-cart');
+  const navOrders = document.getElementById('nav-orders');
+  const logoutClient = document.getElementById('logout-client');
+  if(!ha) return;
 
+  if(state.user && state.user.role === 'client'){
+    ha.style.display = 'flex';
+    if(navCart) navCart.style.display = 'inline-flex';
+    if(navOrders) navOrders.style.display = 'inline-block';
+    if(logoutClient) logoutClient.style.display = 'inline-block';
+  } else {
+    // скрываем именно кнопки, но не ломаем layout
+    if(navCart) navCart.style.display = 'none';
+    if(navOrders) navOrders.style.display = 'none';
+    if(logoutClient) logoutClient.style.display = 'none';
+  }
+}
 // Open client menu
 function openClientMenu(){
     showView('client-menu');
@@ -814,6 +814,7 @@ window.addEventListener('beforeunload', function(evt){
 </script>
 </body>
 </html>
+
 
 
 
