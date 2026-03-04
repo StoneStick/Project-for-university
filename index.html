@@ -59,6 +59,7 @@
 }
         .hotbar { margin-bottom: 12px; }
         .hotbar button { margin-right: 8px; }
+        #admin-filter-bar{ display:flex; justify-content:center; gap:10px;margin:15px 0 20px 0;}
         .topbar { display:flex; flex-direction:column; align-items:center; gap:8px; }
         .cart-list, .orders-list, .admin-list { display:flex; flex-direction:column; gap:10px; }
         .list-item { background:white; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
@@ -84,6 +85,7 @@
         <button id="nav-cart" class="cart-btn" type="button">Корзина <span id="cart-count-badge">0</span></button>
         <button id="nav-orders" type="button">Мои заказы</button>
         <button id="logout-client" type="button">Выйти</button>
+        <button id="logout-admin" type="button">Выйти</button>
     </div>
 </header>
 
@@ -152,7 +154,7 @@
         <div style="max-width:420px;">
             <div style="background:#fff; padding:12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
                 <label>Номер карты</label>
-                <input id="pay-card" placeholder="1234 5678 9012 3456" required>
+                <inpuаt id="pay-card" placeholder="1234 5678 9012 3456" required>
                 <label>Срок (MM/YY)</label>
                 <input id="pay-exp" placeholder="12/26" required>
                 <label>CVV</label>
@@ -170,16 +172,8 @@
 
     <!-- Admin dashboard -->
     <div id="view-admin" class="hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:center; align-items:center;">
             <h2>Админ-панель</h2>
-            <div class="hotbar" id="admin-filter-bar">
-    <button data-status="all">Все</button>
-    <button data-status="принят">Принят</button>
-    <button data-status="готовится">Готовится</button>
-    <button data-status="собирается">Собирается</button>
-    <button data-status="готов">Готов</button>
-            </div>
-            <div><button id="logout-admin">Выйти</button></div>
         </div>
         <p class="small">Панель — оплаченные текущие заказы</p>
 
@@ -486,18 +480,27 @@ function updateHeaderForUser(){
   const navCart = document.getElementById('nav-cart');
   const navOrders = document.getElementById('nav-orders');
   const logoutClient = document.getElementById('logout-client');
+  const logoutAdmin = document.getElementById('logout-admin');
+
   if(!ha) return;
 
-  if(state.user && state.user.role === 'client'){
+  // прячем всё по умолчанию
+  ha.style.display = 'none';
+  if(navCart) navCart.style.display = 'none';
+  if(navOrders) navOrders.style.display = 'none';
+  if(logoutClient) logoutClient.style.display = 'none';
+  if(logoutAdmin) logoutAdmin.style.display = 'none';
+
+  if(state.user?.role === 'client'){
     ha.style.display = 'flex';
     if(navCart) navCart.style.display = 'inline-flex';
     if(navOrders) navOrders.style.display = 'inline-block';
     if(logoutClient) logoutClient.style.display = 'inline-block';
-  } else {
-    // скрываем именно кнопки, но не ломаем layout
-    if(navCart) navCart.style.display = 'none';
-    if(navOrders) navOrders.style.display = 'none';
-    if(logoutClient) logoutClient.style.display = 'none';
+  }
+
+  if(state.user?.role === 'admin'){
+    ha.style.display = 'flex';
+    if(logoutAdmin) logoutAdmin.style.display = 'inline-block';
   }
 }
 // Open client menu
@@ -863,6 +866,7 @@ window.addEventListener('beforeunload', function(evt){
 </script>
 </body>
 </html>
+
 
 
 
